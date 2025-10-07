@@ -1,0 +1,185 @@
+// Prisma schema pour Application Vacances Longueuil
+// Généré selon les exigences fonctionnelles (Azure SQL)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("AZURE_SQL_CONNECTION_STRING")
+}
+
+model Employee {
+  id             String      @id @default(cuid())
+  upn            String?     @unique
+  full_name      String
+  title          String?
+  team           String
+  division       String?
+  seniority_date DateTime
+  status         EmployeeStatus @default(active)
+  manager_upn    String?
+  requests       TimeOffRequest[]
+  entitlements   Entitlement[]
+  roundSlots     RoundSlot[]
+  auditLogs      AuditLog[]     @relation("EmployeeAuditActor")
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+enum EmployeeStatus {
+  active
+  inactive
+}
+
+model Week {
+  id             String    @id @default(cuid())
+  monday_date    DateTime  @unique
+  year           Int
+  week_number_iso Int
+  is_holiday_week Boolean  @default(false)
+  notes          String?
+  requestWeeks   RequestWeek[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Entitlement {
+  id                       String   @id @default(cuid())
+  employee                Employee @relation(fields: [employeeId], references: [id])
+  employeeId              String
+  year                    Int
+  vacation_days_total     Decimal @db.Decimal(4, 1)
+  vacation_days_remaining Decimal @db.Decimal(4, 1)
+  ta_hours_total          Decimal @db.Decimal(5, 1)
+  ta_hours_remaining      Decimal @db.Decimal(5, 1)
+  personal_days_remaining Decimal @db.Decimal(4, 1)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  @@unique([employeeId, year])
+}
+
+enum TimeOffType {
+  VAC
+  TA
+  PER
+  CM
+  OTHER
+}
+
+enum PartialDay {
+  AM
+  PM
+  FULL
+}
+
+enum RequestStatus {
+  draft
+  submitted
+  approved
+  rejected
+  locked
+}
+
+model TimeOffRequest {
+  id              String        @id @default(cuid())
+  employee        Employee      @relation(fields: [employeeId], references: [id])
+  employeeId      String
+  type            TimeOffType
+  start_date      DateTime
+  end_date        DateTime
+  partial_day     PartialDay?
+  status          RequestStatus @default(draft)
+  submitted_at    DateTime?
+  approved_by_upn String?
+  round           Round?        @relation(fields: [roundId], references: [id])
+  roundId         String?
+  comment         String?
+  requestWeeks    RequestWeek[]
+  auditLogs       AuditLog[]    @relation("RequestAudit")
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([employeeId, start_date, end_date])
+}
+
+model RequestWeek {
+  id          String   @id @default(cuid())
+  request     TimeOffRequest @relation(fields: [requestId], references: [id])
+  requestId   String
+  week        Week     @relation(fields: [weekId], references: [id])
+  weekId      String
+  days_in_week Decimal  @db.Decimal(3, 1)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([requestId, weekId])
+}
+
+model Settings {
+  id                       String @id @default(cuid())
+  year                     Int    @unique
+  rounds_count             Int
+  max_weeks_per_round      Int
+  min_staff_by_team_and_week Json
+  blackout_weeks           Json
+  priority_logic           String
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+}
+
+model Round {
+  id             String   @id @default(cuid())
+  year           Int
+  round_number   Int
+  opens_at       DateTime
+  closes_at      DateTime
+  is_locked      Boolean  @default(false)
+  allowed_weeks_this_round Int
+  slots          RoundSlot[]
+  requests       TimeOffRequest[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([year, round_number])
+}
+
+model RoundSlot {
+  id          String   @id @default(cuid())
+  round       Round    @relation(fields: [roundId], references: [id])
+  roundId     String
+  employee    Employee @relation(fields: [employeeId], references: [id])
+  employeeId  String
+  slot_order  Int
+  acted_at    DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([roundId, slot_order])
+}
+
+model Holiday {
+  id         String   @id @default(cuid())
+  date       DateTime @unique
+  label      String
+  applies_to String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  actor_upn   String
+  action      String
+  entity      String
+  entity_id   String
+  before_json Json?
+  after_json  Json?
+  happened_at DateTime @default(now())
+  employee    Employee? @relation("EmployeeAuditActor", fields: [actorEmployeeId], references: [id])
+  actorEmployeeId String?
+  request    TimeOffRequest? @relation("RequestAudit", fields: [requestId], references: [id])
+  requestId  String?
+}
