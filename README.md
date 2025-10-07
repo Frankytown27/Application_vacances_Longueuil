@@ -1,5 +1,14 @@
 # Application Vacances Longueuil
 
+Application de gestion des demandes de vacances pour la Ville de Longueuil, migrée vers Supabase et une architecture web standard.
+
+## Architecture
+
+- **Frontend**: React + Vite + Fluent UI
+- **Backend**: Express API
+- **Base de données**: PostgreSQL (Supabase)
+- **Authentification**: Supabase Auth
+
 Solution de planification des vacances pour Microsoft Teams (onglet + API Azure Functions) destinée à la Direction du Développement urbain de Longueuil.
 
 ## Structure du dépôt

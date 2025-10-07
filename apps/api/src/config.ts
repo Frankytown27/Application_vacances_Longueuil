@@ -1,17 +1,16 @@
 import { config as loadEnv } from "dotenv";
+import path from "node:path";
 
-loadEnv();
+loadEnv({ path: path.join(__dirname, "../../.env") });
 
 export const appConfig = {
-  databaseUrl: process.env.AZURE_SQL_CONNECTION_STRING ?? "",
-  jwtAudience: process.env.JWT_AUDIENCE ?? "",
-  jwtIssuer: process.env.JWT_ISSUER ?? "",
-  azureTenantId: process.env.AZURE_TENANT_ID ?? "",
-  azureClientId: process.env.AZURE_CLIENT_ID ?? "",
-  azureClientSecret: process.env.AZURE_CLIENT_SECRET ?? "",
+  supabaseUrl: process.env.VITE_SUPABASE_URL ?? "",
+  supabaseAnonKey: process.env.VITE_SUPABASE_ANON_KEY ?? "",
+  databaseUrl: process.env.DATABASE_URL ?? "",
   defaultYear: Number.parseInt(process.env.APP_DEFAULT_YEAR ?? "2025", 10),
+  port: Number.parseInt(process.env.PORT ?? "3001", 10),
 };
 
-if (!appConfig.jwtAudience || !appConfig.jwtIssuer) {
-  console.warn("JWT configuration missing. API routes will reject authenticated requests until configured.");
+if (!appConfig.supabaseUrl || !appConfig.supabaseAnonKey) {
+  console.warn("Supabase configuration missing. API authentication will not work.");
 }

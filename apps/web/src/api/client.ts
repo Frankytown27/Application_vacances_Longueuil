@@ -1,16 +1,16 @@
 import axios from "axios";
-import { acquireToken } from "../auth/azureAd";
+import { supabase } from "../lib/supabase";
 
-const baseURL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:7071/api";
+const baseURL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3001/api";
 
 export const apiClient = axios.create({
   baseURL,
 });
 
 apiClient.interceptors.request.use(async (config) => {
-  const token = await acquireToken();
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session?.access_token) {
+    config.headers.Authorization = `Bearer ${session.access_token}`;
   }
   return config;
 });

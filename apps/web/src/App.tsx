@@ -1,13 +1,13 @@
 import { makeStyles, shorthands } from "@fluentui/react-components";
 import { Navigation24Regular } from "@fluentui/react-icons";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
-import { initTeams } from "./app/teams";
-import { initializeAuth } from "./auth/azureAd";
 import { AdminLayout } from "./components/layout/AdminLayout";
 import { MainLayout } from "./components/layout/MainLayout";
+import { supabase } from "./lib/supabase";
 import Home from "./pages/Home";
 import RequestPlanner from "./pages/RequestPlanner";
+import Login from "./pages/Login";
 import AdminPlanning from "./pages/Admin/Planning";
 import AdminRounds from "./pages/Admin/Rounds";
 import AdminSettings from "./pages/Admin/Settings";
@@ -24,11 +24,29 @@ const useStyles = makeStyles({
 
 const App: React.FC = () => {
   const styles = useStyles();
+  const [session, setSession] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    initTeams().catch((error) => console.error("Teams init failed", error));
-    initializeAuth().catch((error) => console.error("Auth init failed", error));
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setLoading(false);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
+
+  if (loading) {
+    return <div>Chargement...</div>;
+  }
+
+  if (!session) {
+    return <Login />;
+  }
 
   return (
     <div className={styles.app}>
