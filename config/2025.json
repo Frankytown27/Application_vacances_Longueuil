@@ -1,0 +1,52 @@
+{
+  "year": 2025,
+  "rounds": {
+    "rounds_count": 3,
+    "max_weeks_per_round": 2,
+    "windows": [
+      {
+        "round_number": 1,
+        "opens_at": "2024-11-04T13:00:00Z",
+        "closes_at": "2024-11-15T21:00:00Z",
+        "allowed_weeks_this_round": 2
+      },
+      {
+        "round_number": 2,
+        "opens_at": "2024-11-25T13:00:00Z",
+        "closes_at": "2024-12-06T21:00:00Z",
+        "allowed_weeks_this_round": 2
+      },
+      {
+        "round_number": 3,
+        "opens_at": "2025-01-06T13:00:00Z",
+        "closes_at": "2025-01-17T21:00:00Z",
+        "allowed_weeks_this_round": 3
+      }
+    ]
+  },
+  "min_staff_by_team_and_week": {
+    "Direction": {
+      "2025-05-05": 2,
+      "2025-06-23": 2,
+      "2025-07-07": 2,
+      "2025-08-04": 2
+    },
+    "Projets majeurs": {
+      "2025-05-05": 3,
+      "2025-06-23": 3,
+      "2025-07-07": 3,
+      "2025-08-04": 3
+    }
+  },
+  "blackout_weeks": [
+    "2025-06-23",
+    "2025-06-30"
+  ],
+  "holidays": [
+    { "date": "2025-01-01", "label": "Jour de l'An", "applies_to": "all" },
+    { "date": "2025-01-02", "label": "Lendemain du Jour de l'An", "applies_to": "all" },
+    { "date": "2025-04-18", "label": "Vendredi saint", "applies_to": "all" },
+    { "date": "2025-06-24", "label": "Fête nationale", "applies_to": "all" },
+    { "date": "2025-07-01", "label": "Fête du Canada", "applies_to": "all" }
+  ]
+}
